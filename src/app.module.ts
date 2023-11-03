@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import * as path from 'path';
 
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CustomConfigModule } from './config/config.module';
 import { CustomConfigService } from './config/config.service';
-import { UserEntity } from './database/entities/user.entity';
 import { UserModule } from './user/user.module';
+import { UserService } from './user/user.service';
 
 @Module({
   imports: [
@@ -21,15 +24,17 @@ import { UserModule } from './user/user.module';
           password: customConfigService.db_password,
           database: customConfigService.db_database,
           synchronize: true,
-          entities: [UserEntity],
+          entities: [
+            path.join(__dirname, 'database', '**', '*.entity{.ts,.js}'),
+          ],
         };
       },
       inject: [CustomConfigService],
-    } as TypeOrmModuleAsyncOptions),
+    }),
     UserModule,
     AuthModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService, UserService],
 })
 export class AppModule {}
